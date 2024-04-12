@@ -12,28 +12,28 @@ fn read_content[input: StringLiteral]() -> Optional[String]:
         return None
 
 
-fn generate_encoder(
-    inout mapper: Dict[String, Int]
-) -> fn (String) escaping -> List[Int]:
-    fn encoder(inp: String) -> List[Int]:
-        var result = List[Int]()
-        for i in range(len(inp)):
-            var num = mapper.find(inp[i]).value()
-            result.append(num)
-        return result
+# fn generate_encoder(
+#     mapper: Dict[String, Int]
+# ) -> fn (String) escaping -> List[Int]:
+#     fn encoder(inp: String) escaping -> List[Int]:
+#         var result = List[Int]()
+#         for i in range(len(inp)):
+#             var num = mapper.find(inp[i]).value()
+#             result.append(num)
+#         return result
 
-    return encoder
+#     return encoder
 
 
-fn generate_decoder(mapper: Dict[Int, String]) -> fn (List[Int]) escaping -> String:
-    fn decoder(inp: List[Int]) -> String:
-        var result = String()
-        for i in inp:
-            var char = mapper.find(i[]).value()
-            result += char
-        return result
+# fn generate_decoder(mapper: Dict[Int, String]) -> fn (List[Int]) escaping -> String:
+#     fn decoder(inp: List[Int]) escaping -> String:
+#         var result = String()
+#         for i in inp:
+#             var char = mapper.find(i[]).value()
+#             result += char
+#         return result
 
-    return decoder
+#     return decoder
 
 
 fn main():
@@ -44,9 +44,9 @@ fn main():
 
     var content = possible_content.value()
 
-    var unique_chars = Set[String]()
+    var unique_chars = Dict[String, Int]()
     for idx in range(len(content)):
-        unique_chars.add(content[idx])
+        unique_chars[content[idx]] = 0
 
     print("size:", len(unique_chars))
 
@@ -68,7 +68,44 @@ fn main():
         stoi[chars[i]] = i
         itos[i] = chars[i]
 
-    var encoder = generate_encoder(stoi)
-    var decoder = generate_decoder(itos)
+    for char in stoi:
+        print(char[], end=",")
+    print()
 
-    print(decoder(encoder("Hello!")))
+    fn encoder(inp: Optional[String], stoi: Dict[String, Int]) -> Optional[List[Int]]:
+        if not inp:
+            return None
+
+        var inp_value = inp.value()
+        var result = List[Int]()
+        for i in range(len(inp_value)):
+            var num = stoi.find(inp_value[i])
+            if not num:
+                print("Failed to encode character: `", inp_value[i], "`", sep="")
+                return None
+
+            result.append(num.value())
+
+        return Optional(result)
+
+    fn decoder(inp: Optional[List[Int]], itos: Dict[Int, String]) -> Optional[String]:
+        if not inp:
+            return None
+
+        var inp_value = inp.value()
+        var result = String()
+        for i in inp_value:
+            var char = itos.find(i[])
+            if not char:
+                print("Failed to decode number: `", i[], "`", sep="")
+                return None
+            result += char.value()
+        return Optional(result)
+
+    var to_encode = Optional(String("Hello my Friend!"))
+    var encoded = encoder(to_encode, stoi)
+    var decoded = decoder(encoded, itos)
+    if decoded:
+        print(decoded.value())
+    else:
+        print("Failed to decode")
