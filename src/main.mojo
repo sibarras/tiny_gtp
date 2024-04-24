@@ -12,30 +12,6 @@ fn read_content[input: StringLiteral]() -> Optional[String]:
         return None
 
 
-# fn generate_encoder(
-#     mapper: Dict[String, Int]
-# ) -> fn (String) escaping -> List[Int]:
-#     fn encoder(inp: String) escaping -> List[Int]:
-#         var result = List[Int]()
-#         for i in range(len(inp)):
-#             var num = mapper.find(inp[i]).value()
-#             result.append(num)
-#         return result
-
-#     return encoder
-
-
-# fn generate_decoder(mapper: Dict[Int, String]) -> fn (List[Int]) escaping -> String:
-#     fn decoder(inp: List[Int]) escaping -> String:
-#         var result = String()
-#         for i in inp:
-#             var char = mapper.find(i[]).value()
-#             result += char
-#         return result
-
-#     return decoder
-
-
 fn main():
     var possible_content = read_content[input="input.txt"]()
     if not possible_content:
