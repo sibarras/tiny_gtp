@@ -1,87 +1,47 @@
 from collections.optional import Optional
 from collections.set import Set
-from algorithm.sort import sort
 from builtin.string import chr, ord
+from sys.terminate import exit
+from common import read_bytes
 
 
-fn read_content[input: StringLiteral]() -> Optional[String]:
-    try:
-        with open(input, "r") as f:
-            return Optional(f.read())
-    except:
-        return None
+fn main() raises:
+    var content = read_bytes[input="input.txt"]()
+    var unique_chars = Set[String]()
+    for byte in content:
+        unique_chars.add(chr(int(byte[])))
 
-
-fn main():
-    var possible_content = read_content[input="input.txt"]()
-    if not possible_content:
-        print("Failed to read content. Stopping...")
-        return
-
-    var content = possible_content.value()
-
-    var unique_chars = Dict[String, Int]()
-    for idx in range(len(content)):
-        unique_chars[content[idx]] = 0
-
-    print("size:", len(unique_chars))
-
-    var chrs_indexes = List[Int]()
+    var chars_list = List[String]()
     for char in unique_chars:
-        chrs_indexes.append(ord(char[]))
+        chars_list.append(char[])
 
-    sort(chrs_indexes)
-
-    var chars = String()
-    for i in chrs_indexes:
-        chars += chr(i[])
-
-    print(chars)
+    sort(chars_list)
 
     var stoi = Dict[String, Int]()
     var itos = Dict[Int, String]()
-    for i in range(len(chars)):
-        stoi[chars[i]] = i
-        itos[i] = chars[i]
 
-    for char in stoi:
-        print(char[], end=",")
-    print()
+    for i in range(len(chars_list)):
+        stoi[chars_list[i]] = i
+        itos[i] = chars_list[i]
 
-    fn encoder(inp: Optional[String], stoi: Dict[String, Int]) -> Optional[List[Int]]:
-        if not inp:
-            return None
-
-        var inp_value = inp.value()
+    @parameter
+    fn encoder(inp: String, stoi: Dict[String, Int]) capturing raises -> List[Int]:
         var result = List[Int]()
-        for i in range(len(inp_value)):
-            var num = stoi.find(inp_value[i])
-            if not num:
-                print("Failed to encode character: `", inp_value[i], "`", sep="")
-                return None
+        for i in range(len(inp)):
+            var chr = inp[i]
+            result.append(stoi[chr])
 
-            result.append(num.value())
+        return result
 
-        return Optional(result)
-
-    fn decoder(inp: Optional[List[Int]], itos: Dict[Int, String]) -> Optional[String]:
-        if not inp:
-            return None
-
-        var inp_value = inp.value()
+    @parameter
+    fn decoder(inp: List[Int], itos: Dict[Int, String]) capturing raises -> String:
         var result = String()
-        for i in inp_value:
-            var char = itos.find(i[])
-            if not char:
-                print("Failed to decode number: `", i[], "`", sep="")
-                return None
-            result += char.value()
-        return Optional(result)
+        for i in inp:
+            result += itos[i[]]
 
-    var to_encode = Optional(String("Hello my Friend!"))
+        return result
+
+    var to_encode: String = "Hello my Friend!"
     var encoded = encoder(to_encode, stoi)
     var decoded = decoder(encoded, itos)
-    if decoded:
-        print(decoded.value())
-    else:
-        print("Failed to decode")
+    print(decoded)
