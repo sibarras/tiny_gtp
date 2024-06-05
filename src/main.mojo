@@ -3,6 +3,9 @@ from collections.set import Set
 from builtin.string import chr, ord
 from sys.terminate import exit
 from common import read_bytes
+from tensor import Tensor
+from pathlib import Path
+from bigram import Bigram
 
 
 fn main() raises:
@@ -24,24 +27,10 @@ fn main() raises:
         stoi[chars_list[i]] = i
         itos[i] = chars_list[i]
 
-    @parameter
-    fn encoder(inp: String, stoi: Dict[String, Int]) capturing raises -> List[Int]:
-        var result = List[Int]()
-        for i in range(len(inp)):
-            var chr = inp[i]
-            result.append(stoi[chr])
+    var tensor_input = Path("input.txt")
+    var tensor = Tensor[DType.uint8].fromfile(tensor_input)
 
-        return result
+    for i in range(tensor.num_elements()):
+        tensor[i] = stoi[chr(int(tensor[i]))]
 
-    @parameter
-    fn decoder(inp: List[Int], itos: Dict[Int, String]) capturing raises -> String:
-        var result = String()
-        for i in inp:
-            result += itos[i[]]
-
-        return result
-
-    var to_encode: String = "Hello my Friend!"
-    var encoded = encoder(to_encode, stoi)
-    var decoded = decoder(encoded, itos)
-    print(decoded)
+    var bigram = Bigram(tensor, len(unique_chars))
