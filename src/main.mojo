@@ -31,6 +31,7 @@ fn main() raises:
     var tensor = Tensor[DType.uint8].fromfile(tensor_input)
 
     for i in range(tensor.num_elements()):
-        tensor[i] = stoi[chr(int(tensor[i]))]
+        var index = chr(int(tensor[i]))
+        tensor[i] = stoi.get(index, 0)
 
     var bigram = Bigram(tensor, len(unique_chars))
