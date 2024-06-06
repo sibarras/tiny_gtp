@@ -14,8 +14,10 @@ alias TRAIN_PCNT = 0.9
 alias UI8Tensor = Tensor[DType.uint8]
 
 
-fn slice_tensor(data: UI8Tensor, start: Int, end: Int) raises -> UI8Tensor:
-    var sliced = UI8Tensor(shape=end - start)
+fn slice_tensor[
+    T: DType
+](data: Tensor[T], start: Int, end: Int) raises -> Tensor[T]:
+    var sliced = Tensor[T](shape=end - start)
 
     @parameter
     fn slice_tensor[s: Int](i: Int) capturing -> None:
@@ -25,12 +27,12 @@ fn slice_tensor(data: UI8Tensor, start: Int, end: Int) raises -> UI8Tensor:
     return sliced
 
 
-fn split_train_val(
-    data: UI8Tensor, split_at: Int
-) raises -> Tuple[UI8Tensor, UI8Tensor]:
+fn split_train_val[
+    T: DType
+](data: Tensor[T], split_at: Int) raises -> Tuple[Tensor[T], Tensor[T]]:
     var len = data.num_elements()
-    var train = UI8Tensor(shape=split_at)
-    var validation = UI8Tensor(shape=len - split_at)
+    var train = Tensor[T](shape=split_at)
+    var validation = Tensor[T](shape=len - split_at)
 
     @parameter
     fn split_train_val[s: Int](idx: Int) capturing -> None:
