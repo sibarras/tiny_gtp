@@ -2,10 +2,13 @@ from collections.optional import Optional
 from collections.set import Set
 from builtin.string import chr, ord
 from sys.terminate import exit
-from common import read_bytes
+from common import read_bytes, create_chunks
 from tensor import Tensor
 from pathlib import Path
 from bigram import Bigram
+from tokenizer import tokenize
+
+alias CHUNK_SIZE = 8
 
 
 fn main() raises:
@@ -29,9 +32,11 @@ fn main() raises:
 
     var tensor_input = Path("input.txt")
     var tensor = Tensor[DType.uint8].fromfile(tensor_input)
+    var tokens = tokenize(tensor, stoi)
+    var token_chunks = create_chunks[CHUNK_SIZE](tokens)
+    print(token_chunks)
 
-    for i in range(tensor.num_elements()):
-        var index = chr(int(tensor[i]))
-        tensor[i] = stoi.get(index, 0)
+    print(tensor)
+    print(tokens)
 
-    var bigram = Bigram(tensor, len(unique_chars))
+    var bigram = Bigram(tokens, len(unique_chars))
