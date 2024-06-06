@@ -9,6 +9,22 @@ from bigram import Bigram
 from tokenizer import tokenize
 
 alias CHUNK_SIZE = 8
+alias TRAIN_PCNT = 0.9
+alias UI8Tensor = Tensor[DType.uint8]
+
+
+fn split_train_val[
+    train_pcnt: Float64
+](data: UI8Tensor) -> Tuple[UI8Tensor, UI8Tensor]:
+    var len = data.num_elements()
+    var train = UI8Tensor()
+    var validation = UI8Tensor()
+    for i in range(data.num_elements()):
+        if i < int(len * train_pcnt):
+            train[i] = data[i]
+        else:
+            validation[i] = data[i]
+    return train, validation
 
 
 fn main() raises:
@@ -33,7 +49,10 @@ fn main() raises:
     var tensor_input = Path("input.txt")
     var tensor = Tensor[DType.uint8].fromfile(tensor_input)
     var tokens = tokenize(tensor, stoi)
-    var token_chunks = create_chunks[CHUNK_SIZE](tokens)
+    var splitted_tokens = split_train_val[TRAIN_PCNT](tokens)
+    var train = splitted_tokens[0]
+    var _validation = splitted_tokens[1]
+    var token_chunks = create_chunks[CHUNK_SIZE](train)
     print(token_chunks)
 
     print(tensor)
