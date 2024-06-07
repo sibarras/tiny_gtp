@@ -28,7 +28,19 @@ struct DataSet:
 
 
 fn slice_tensor[
-    T: DType
+    T: DType, //, width: Int
+](data: Tensor[T], index: Int) -> Tensor[T]:
+    return data.load[width=width](index)
+
+
+fn slice_tensor[
+    T: DType, //, start: Int, end: Int
+](data: Tensor[T]) -> Tensor[T]:
+    return data.load[width = end - start](start)
+
+
+fn slice_tensor[
+    T: DType, //
 ](data: Tensor[T], start: Int, end: Int) raises -> Tensor[T]:
     var sliced = Tensor[T](shape=end - start)
 
@@ -74,11 +86,12 @@ fn get_batch[
 
     @parameter
     for i in range(BATCH_SIZE):
-
-        @parameter
-        for j in range(BLOCK_SIZE):
-            x[i * BLOCK_SIZE + j] = data[int(rand[i] + j)]
-            y[i * BLOCK_SIZE + j] = data[int(rand[i] + j + 1)]
+        x.store[width=BLOCK_SIZE](
+            i * BLOCK_SIZE, data.load[width=BLOCK_SIZE](int(rand[i]))
+        )
+        y.store[width=BLOCK_SIZE](
+            i * BLOCK_SIZE, data.load[width=BLOCK_SIZE](int(rand[i] + 1))
+        )
     return x, y
 
 
@@ -114,6 +127,9 @@ fn main() raises:
     var batches = get_batch(DataSet.Train, train, validation)
     var xb = batches[0]
     var yb = batches[1]
+
+    # var first_x = xb.load[width=8](0)
+    # print(first_x)
 
     print("X:", xb)
     print("Y:", yb)
