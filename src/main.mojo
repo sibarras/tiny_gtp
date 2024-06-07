@@ -8,10 +8,23 @@ from pathlib import Path
 from bigram import Bigram
 from tokenizer import tokenize
 from algorithm.functional import vectorize, sync_parallelize
+import random
 
-alias CHUNK_SIZE = 8
+alias BLOCK_SIZE = 8
+alias BATCH_SIZE = 4
+
 alias TRAIN_PCNT = 0.9
 alias UI8Tensor = Tensor[DType.uint8]
+
+
+@value
+struct DataSet:
+    var value: StringLiteral
+    alias Train = Self("Train")
+    alias Validation = Self("Validation")
+
+    fn __eq__(self, other: DataSet) -> Bool:
+        return self.value == other.value
 
 
 fn slice_tensor[
@@ -46,6 +59,29 @@ fn split_train_val[
     return train, validation
 
 
+fn get_batch[
+    T: DType
+](
+    split: DataSet, train_data: Tensor[T], validation_data: Tensor[T]
+) raises -> Tuple[Tensor[T], Tensor[T]]:
+    var data = train_data if split == DataSet.Train else validation_data
+    var x = Tensor[T](shape=(BATCH_SIZE, BLOCK_SIZE))
+    var y = Tensor[T](shape=(BATCH_SIZE, BLOCK_SIZE))
+    var rand_t = Tensor[DType.float32].rand(BATCH_SIZE) * Float64(
+        data.num_elements() - BLOCK_SIZE
+    )
+    var rand = rand_t.astype[T]()
+
+    @parameter
+    for i in range(BATCH_SIZE):
+
+        @parameter
+        for j in range(BLOCK_SIZE):
+            x[i * BLOCK_SIZE + j] = data[int(rand[i] + j)]
+            y[i * BLOCK_SIZE + j] = data[int(rand[i] + j + 1)]
+    return x, y
+
+
 fn main() raises:
     var content = read_bytes[input="input.txt"]()
     var unique_chars = Set[String]()
@@ -72,13 +108,12 @@ fn main() raises:
         tokens, split_at=int(TRAIN_PCNT * tokens.num_elements())
     )
     var train = splitted_tokens[0]
-    _ = splitted_tokens[1]
+    var validation = splitted_tokens[1]
 
-    var x = slice_tensor(train, 0, CHUNK_SIZE)
-    var y = slice_tensor(train, 1, CHUNK_SIZE + 1)
-    for i in range(CHUNK_SIZE):
-        print("When input is", slice_tensor(x, 0, i + 1), "output is", y[i])
-    # var shape = TensorShape(8, tokens.num_elements() // 8)
-    # print("Reshaped:", tokens.reshape(shape))
-    # var token_chunks = create_chunks[CHUNK_SIZE](train)
-    # var bigram = Bigram(tokens, len(unique_chars))
+    random.seed(1337)
+    var batches = get_batch(DataSet.Train, train, validation)
+    var xb = batches[0]
+    var yb = batches[1]
+
+    print("X:", xb)
+    print("Y:", yb)
