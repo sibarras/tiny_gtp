@@ -8,6 +8,7 @@ from pathlib import Path
 from bigram import Bigram
 from tokenizer import tokenize
 from algorithm.functional import vectorize, sync_parallelize
+from embedding import Embedding
 import random
 
 alias BLOCK_SIZE = 8
@@ -101,6 +102,7 @@ fn main() raises:
     for byte in content:
         unique_chars.add(chr(int(byte[])))
 
+    var vocab_size = len(unique_chars)
     var chars_list = List[String]()
     for char in unique_chars:
         chars_list.append(char[])
@@ -128,8 +130,7 @@ fn main() raises:
     var xb = batches[0]
     var yb = batches[1]
 
-    # var first_x = xb.load[width=8](0)
-    # print(first_x)
+    var emb = Embedding(vocab_size, vocab_size)
+    var logits = emb.embed(xb)
 
-    print("X:", xb)
-    print("Y:", yb)
+    print(logits)
