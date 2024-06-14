@@ -131,6 +131,6 @@ fn main() raises:
     var yb = batches[1]
 
     var emb = Embedding(vocab_size, vocab_size)
-    var logits = emb.embed(xb)
+    var logits = emb.apply(xb)
 
     print(logits)

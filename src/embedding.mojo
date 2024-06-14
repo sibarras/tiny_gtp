@@ -5,21 +5,23 @@ alias test_simd = SIMD[DType.uint8, size=4](1, 2, 3, 4)
 
 
 struct Embedding:
-    var data: Tensor[DType.uint8]
+    var num_embeddings: Int
+    var embedding_dim: Int
 
     fn __init__(inout self, num_embeddings: Int, embedding_dim: Int) -> None:
-        self.data = Tensor[DType.uint8](shape=(num_embeddings, embedding_dim))
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
 
-    fn embed(inout self, indices: Tensor[DType.uint8]) -> Tensor[DType.uint8]:
-        var len = indices.num_elements()
-        var embedded = Tensor[DType.uint8](
-            shape=(len, int(self.data.shape()[1]))
+    fn apply(inout self, indices: Tensor[DType.uint8]) -> Tensor[DType.uint8]:
+        # var len = indices.num_elements()
+        var data = Tensor[DType.float64](
+            shape=(indices.shape()[0], indices.shape()[1], self.embedding_dim)
         )
 
-        @parameter
-        fn embed[s: Int](i: Int) capturing -> None:
-            embedded[i] = self.data[int(indices[i])]
+        # @parameter
+        # fn apply_closure[s: Int](i: Int) capturing -> None:
+        #     data[i] = self.data[int(indices[i])]
 
-        vectorize[embed, 1](len)
+        # vectorize[apply_closure, 1](len)
 
-        return embedded
+        return data
